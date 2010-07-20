@@ -66,6 +66,7 @@ module ActiveRecordProfiler
 
     attr_accessor :last_stats_flush
     attr_accessor :query_sites
+    attr_accessor :profile_data_directory
     
     @@collector = nil
     def self.instance
@@ -89,6 +90,7 @@ module ActiveRecordProfiler
     def initialize
       @query_sites = {}
       @last_stats_flush = nil
+      @profile_data_directory = self.class.profile_dir
     end
     
     def call_location_name
@@ -117,9 +119,9 @@ module ActiveRecordProfiler
       RAILS_DEFAULT_LOGGER.info("Flushing ActiveRecordProfiler statistics for PID #{pid} at #{flush_time} (#{site_count} sites).")
       
       if (site_count > 0)
-        FileUtils.makedirs(profile_dir)
+        FileUtils.makedirs(self.profile_data_directory)
       
-        filename = File.join(profile_dir, "#{flush_time.strftime(DATETIME_FORMAT)}.#{pid}.prof")
+        filename = File.join(self.profile_data_directory, "#{flush_time.strftime(DATETIME_FORMAT)}.#{pid}.prof")
         write_file(filename)
         
         # Nuke each value to make sure it can be reclaimed by Ruby
@@ -133,9 +135,9 @@ module ActiveRecordProfiler
       prefix = options[:prefix]
       compact = options[:compact]
       raise "Cannot compact without a prefix!" if compact && prefix.nil?
-      return self.query_sites unless File.exists?(profile_dir)
+      return self.query_sites unless File.exists?(self.profile_data_directory)
       
-      dir = Dir.new(profile_dir)
+      dir = Dir.new(self.profile_data_directory)
       now = Time.now
       raw_files_processed = []
       date_regexp = Regexp.new(prefix) if prefix
