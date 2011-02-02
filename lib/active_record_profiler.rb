@@ -68,9 +68,8 @@ module ActiveRecordProfiler
     attr_accessor :query_sites
     attr_accessor :profile_data_directory
     
-    @@collector = nil
     def self.instance
-      @@collector ||= Collector.new
+      Thread.current[:active_record_profiler_collector] ||= Collector.new
     end
     
     def self.profiler_enabled?
@@ -114,14 +113,15 @@ module ActiveRecordProfiler
     
     def flush_query_sites_statistics
       pid = $$
+      thread_id = Thread.current.object_id
       flush_time = Time.now
       site_count = self.query_sites.keys.size
-      RAILS_DEFAULT_LOGGER.info("Flushing ActiveRecordProfiler statistics for PID #{pid} at #{flush_time} (#{site_count} sites).")
+      RAILS_DEFAULT_LOGGER.info("Flushing ActiveRecordProfiler statistics for PID #{pid} THR #{thread_id} at #{flush_time} (#{site_count} sites).")
       
       if (site_count > 0)
         FileUtils.makedirs(self.profile_data_directory)
       
-        filename = File.join(self.profile_data_directory, "#{flush_time.strftime(DATETIME_FORMAT)}.#{pid}.prof")
+        filename = File.join(self.profile_data_directory, "#{flush_time.strftime(DATETIME_FORMAT)}.#{pid}-#{thread_id}.prof")
         write_file(filename)
         
         # Nuke each value to make sure it can be reclaimed by Ruby
