@@ -156,9 +156,13 @@ module ActiveRecordProfiler
         end
 
         if (file_time.nil? || ((file_time + AGGREGATE_QUIET_PERIOD) < now))
-          update_from_file(File.join(dir.path, filename))
+          begin
+            update_from_file(File.join(dir.path, filename))
           
-          raw_files_processed << filename if file_time    # any files that are already aggregated don't count
+            raw_files_processed << filename if file_time    # any files that are already aggregated don't count
+          rescue Exception => e
+            RAILS_DEFAULT_LOGGER.warn "Unable to read file #{filename}: #{e.message}"
+          end
         else
           RAILS_DEFAULT_LOGGER.info "Skipping file #{filename} because it is too new and may still be open for writing."
         end
