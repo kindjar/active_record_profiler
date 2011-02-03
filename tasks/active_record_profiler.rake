@@ -17,7 +17,7 @@ namespace "profiler" do
     if compact && prefix.nil?
       case compact
       when :date
-        prefix = 1.day.ago.strtime(ActiveRecordProfiler::DATE_FORMAT)
+        prefix = 1.day.ago.strftime(ActiveRecordProfiler::DATE_FORMAT)
       when :hour
         prefix = 1.hour.ago.strftime(ActiveRecordProfiler::DATE_FORMAT + ActiveRecordProfiler::HOUR_FORMAT)
       end
