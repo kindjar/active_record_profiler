@@ -1,34 +1,25 @@
-# ActiveRecordProfiler
-
 module ActiveRecordProfiler
-  require 'fileutils'
-  require 'json'
-  begin
-    require 'fastercsv'
-  rescue Exception => e
-    RAILS_DEFAULT_LOGGER.debug("FasterCSV not available for use in ActiveRecordProfiler")
-  end
-  
-  DURATION = 0
-  COUNT = 1
-  LONGEST = 2
-  LONGEST_SQL = 3
-  LOCATION = -1
-  AVG_DURATION = -2
-  
-  DATE_FORMAT = '%Y-%m-%d'
-  HOUR_FORMAT = '-%H'
-  DATETIME_FORMAT = DATE_FORMAT + HOUR_FORMAT + '-%M'
-  AGGREGATE_QUIET_PERIOD = 1.minutes
-  
-  CSV_DURATION = 0
-  CSV_COUNT = 1
-  CSV_AVG = 2
-  CSV_LONGEST = 3
-  CSV_LOCATION = 4
-  CSV_LONGEST_SQL = 5
-  
   class Collector
+    DURATION = 0
+    COUNT = 1
+    LONGEST = 2
+    LONGEST_SQL = 3
+    LOCATION = -1
+    AVG_DURATION = -2
+    
+    DATE_FORMAT = '%Y-%m-%d'
+    HOUR_FORMAT = '-%H'
+    DATETIME_FORMAT = DATE_FORMAT + HOUR_FORMAT + '-%M'
+    AGGREGATE_QUIET_PERIOD = 1.minutes
+    
+    CSV_DURATION = 0
+    CSV_COUNT = 1
+    CSV_AVG = 2
+    CSV_LONGEST = 3
+    CSV_LOCATION = 4
+    CSV_LONGEST_SQL = 5
+     
+
     # You can disable the profiler by setting 
     # ActiveRecordProfiler::Collector.profile_environments = []
     # (default: [ 'development', 'staging' ])
@@ -45,7 +36,6 @@ module ActiveRecordProfiler
     
     # Directory where profile data is recorded
     cattr_accessor :profile_dir
-    self.profile_dir = File.join(RAILS_ROOT, "log", "profiler_data")
 
     # Any SQL statements matching this pattern will not be tracked by the profiler output
     # (though it will still appear in the enhanced SQL logging).
@@ -56,7 +46,6 @@ module ActiveRecordProfiler
     self.app_path_pattern = Regexp.new(Regexp.quote("/app/"))
     
     cattr_accessor :trim_root_path
-    self.trim_root_path = RAILS_ROOT[-1] == "/" ? RAILS_ROOT : RAILS_ROOT + "/"
     
     cattr_accessor :storage_backend
     self.storage_backend = :json    # or :fastercsv
@@ -72,8 +61,8 @@ module ActiveRecordProfiler
       Thread.current[:active_record_profiler_collector] ||= Collector.new
     end
     
-    def self.profiler_enabled?
-      profile_environments.include?(ENV['RAILS_ENV'])
+    def self.profiler_enabled_for_current_env?
+      profile_environments.include?(Rails.env.to_s)
     end
     
     def self.profile_self?
@@ -116,7 +105,7 @@ module ActiveRecordProfiler
       thread_id = Thread.current.object_id
       flush_time = Time.now
       site_count = self.query_sites.keys.size
-      RAILS_DEFAULT_LOGGER.info("Flushing ActiveRecordProfiler statistics for PID #{pid} THR #{thread_id} at #{flush_time} (#{site_count} sites).")
+      Rails.logger.info("Flushing ActiveRecordProfiler statistics for PID #{pid} at #{flush_time} (#{site_count} sites).")
       
       if (site_count > 0)
         FileUtils.makedirs(self.profile_data_directory)
@@ -164,7 +153,7 @@ module ActiveRecordProfiler
             RAILS_DEFAULT_LOGGER.warn "Unable to read file #{filename}: #{e.message}"
           end
         else
-          RAILS_DEFAULT_LOGGER.info "Skipping file #{filename} because it is too new and may still be open for writing."
+          Rails.logger.info "Skipping file #{filename} because it is too new and may still be open for writing."
         end
       end
 
@@ -345,9 +334,6 @@ module ActiveRecordProfiler
           log_info_without_caller_tracking(sql, name, seconds)
         end
       end
-      alias_method_chain :log_info, :caller_tracking
-      
     end
   end
 end
-

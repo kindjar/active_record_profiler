@@ -26,64 +26,74 @@ restart all of its counters/timers. The output file is named for the time
 and PID from which it was written, so that multiple processes can safely
 write their output simultaneously.
 
-
 Configuration
 =============
-Enable the profiler for given environments (default: ['development', 'staging'])
-  ActiveRecordProfiler::Collector.profile_environments = %w( development )
+You can configure several aspect of the profiler in an initializer (eg: `config/initializers/profiler.rb`).
 
-Control the (approximate) frequency of statistics flushes (default: 1.hour)
-  ActiveRecordProfiler::Collector.stats_flush_period = 1.hour
+Control what environments the profiler runs in (default: `['development', 'staging']`)
 
-Directory where profile data is recorded (default: "#{RAILS_ROOT}/log/profiler_data")
-  ActiveRecordProfiler::Collector.profile_dir = File.join(RAILS_ROOT, "log", "profiler_data")
+    ActiveRecordProfiler::Collector.profile_environments = %w( development )
+
+Control the (approximate) frequency of statistics flushes (default: `1.hour`)
+
+    ActiveRecordProfiler::Collector.stats_flush_period = 1.hour
+
+Directory where profile data is recorded (default: `"#{RAILS_ROOT}/log/profiler_data"`)
+
+    ActiveRecordProfiler::Collector.profile_dir = File.join(RAILS_ROOT, "log", "profiler_data")
 
 Any SQL statements matching this pattern will not be tracked by the 
 profiler output, though it will still appear in the enhanced SQL logging
-(default: /^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT)/)
-  ActiveRecordProfiler::Collector.sql_ignore_pattern = /^SET /
+(default: `/^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT)/`)
+
+    ActiveRecordProfiler::Collector.sql_ignore_pattern = /^SET /
 
 If you don't want to use the JSON gem to store your profiler data, you can
 use the FasterCSV gem instead, but due to field length constraints in 
 FasterCSV's parsing code, some of your SQL may be truncated.
-  ActiveRecordProfiler::Collector.storage_backend = :fastercsv
+
+    ActiveRecordProfiler::Collector.storage_backend = :fastercsv
 
 
 Reports
 =======
 To see a top-100 list of what SQL statements your application is spending its
 time in, run the following rake task:
-  rake profiler:aggregate RAILS_ENV=qa max_lines=100 show_sql=true
+
+    rake profiler:aggregate RAILS_ENV=qa max_lines=100 show_sql=true
 
 This will return a list of the SQL which is taking the most time in your 
 application in this format:
 
-<file path>:<line number>:in <method name>: <total duration>, <call count>, <max single call duration>
+    <file path>:<line number>:in <method name>: <total duration>, <call count>, <max single call duration>
 
 This will aggregate all of the profiler data you have accumulated; in order 
-to limit the timeframe of the data, use the "prefix" option to specify a
+to limit the timeframe of the data, use the `prefix` option to specify a
 partial date/time:
-  rake profiler:aggregate RAILS_ENV=qa max_lines=100 show_sql=true prefix=2010-06-20-10  # data from June 20 during the 10am hour (roughly)
+
+    rake profiler:aggregate RAILS_ENV=qa max_lines=100 show_sql=true prefix=2010-06-20-10  # data from June 20 during the 10am hour (roughly)
 
 Each process running the profiler flushes its stats periodically, and there
 is a rake task to combine multiple profiler data files together in order to 
 keep the number of data files down to a manageable number. A good way to 
 manage the data files on a server is to set up a cron task to run the 
 following command once per hour or once per day:
-  rake profiler:aggregate compact=<'hour' or 'date'> RAILS_ENV=qa
+
+    rake profiler:aggregate compact=<'hour' or 'date'> RAILS_ENV=qa
 
 Compacting by hour will result in a single file for each hour any process 
 dumped its stats. Compacting by day will result in a single file for each 
-day. When using the 'prefix' option to generate a profiler report, you
+day. When using the `prefix` option to generate a profiler report, you
 cannot specify an hour if you have compacted your data by date instead of
 hour (the prefix matching operates on the file names, which will not have
 hours if they have been compacted by date).
 
 You can clear out all profiler data using the following command:
-  rake profiler:clear_data RAILS_ENV=qa
+
+    rake profiler:clear_data RAILS_ENV=qa
   
 If you want programmatic access to the profiler data, check out the source
-code for the rake tasks in tasks/active_record_profiler.rake.
+code for the rake tasks in `lib/active-record-profiler/tasks.rake`.
 
 
 HTML Reports
@@ -134,6 +144,5 @@ was triggered (Note: the current javascript requires jQuery):
 Miscellaneous
 =============
 
-Author: Ben Turner (ben@gist.com)
-
 Copyright (c) 2010 Gist, Inc.
+Copyright (c) 2015 Benjamin Turner

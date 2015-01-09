@@ -1,12 +1,11 @@
-require File.dirname(__FILE__) + '/test_helper.rb'
+require 'test_helper.rb'
 
-
-class ActiveRecordProfilerTest < Test::Unit::TestCase
+class ActiveRecordProfilerTest < ActiveSupport::TestCase
   def setup
     @collector = ActiveRecordProfiler::Collector.instance
     @test_log = StringIO.new
-    ActiveRecord::Base.logger = ActiveSupport::BufferedLogger.new(@test_log)
-    ActiveRecord::Base.establish_connection($test_config['test'])
+    ActiveRecord::Base.logger = ActiveSupport::Logger.new(@test_log)
+    # ActiveRecord::Base.establish_connection($test_config['test'])
   end
   
   def test_caller_location_appears_in_log
