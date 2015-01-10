@@ -80,9 +80,9 @@ This will aggregate all of the profiler data you have accumulated; in order
 to limit the timeframe of the data, use the `prefix` option to specify a
 partial date/time:
 
-    rake profiler:aggregate RAILS_ENV=qa max_lines=100 show_sql=true prefix=2010-06-20-10  # data from June 20 during the 10am hour (roughly)
+    rake profiler:aggregate max_lines=100 show_sql=true prefix=2010-06-20-10  # data from June 20 during the 10am hour (roughly)
 
-Each process running the profiler flushes its stats periodically, and there
+Each thread running the profiler flushes its stats periodically, and there
 is a rake task to combine multiple profiler data files together in order to 
 keep the number of data files down to a manageable number. A good way to 
 manage the data files on a server is to set up a cron task to run the 
@@ -99,7 +99,7 @@ hours if they have been compacted by date).
 
 You can clear out all profiler data using the following command:
 
-    rake profiler:clear_data RAILS_ENV=qa
+    rake profiler:clear_data
   
 If you want programmatic access to the profiler data, check out the source
 code for the rake tasks in `lib/active-record-profiler/tasks.rake`.
