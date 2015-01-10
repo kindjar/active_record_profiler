@@ -28,18 +28,14 @@ write their output simultaneously.
 
 Installation
 ============
-Add it to your Gemfile, do `bundle install`, and add the following to any `config/environments/*.rb*` files where you want to enable the profiler (or add it to `config/application.rb` if you want it enabled everywhere) :
-
-    config.log_formatter = ActiveRecordProfiler::LogFormatter.new
-
-Then add a new initializer, `config/initializers/active_record_profiler.rb`:
+Add it to your Gemfile, do `bundle install`, and then add a new initializer, `config/initializers/active_record_profiler.rb`:
 
     ActiveRecord::Base.logger =
         ActiveRecordProfiler::Logger.new(ActiveRecord::Base.logger)
-    ActiveRecordProfiler::LogSubscriber.attach_to :active_record
+    ActiveRecordProfiler::LogSubscriber.attach_to :active_record unless Rails.env.test?
 
 
-The first line adds call-site information to ActiveRecord logging, and the second line enables profiling.
+The first line adds call-site information to ActiveRecord logging, and the second line enables profiling (except in the test environment, where it would mess up your profiling data).
 
 Configuration
 =============
