@@ -4,8 +4,8 @@ class ActiveRecordProfilerTest < ActiveSupport::TestCase
   def setup
     @collector = ActiveRecordProfiler::Collector.instance
     @test_log = StringIO.new
-    ActiveRecord::Base.logger = ActiveSupport::Logger.new(@test_log)
-    ActiveRecord::Base.logger.formatter = ActiveRecordProfiler::LogFormatter.new
+    ActiveRecord::Base.logger = ActiveRecordProfiler::Logger.new(
+        ActiveSupport::Logger.new(@test_log))
   end
   
   def test_caller_location_appears_in_log

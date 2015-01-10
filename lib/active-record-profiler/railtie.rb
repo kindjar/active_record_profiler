@@ -9,9 +9,6 @@ module ActiveRecordProfiler
 
       Collector.trim_root_path = "#{Rails.root.expand_path}/"
       Collector.profile_dir = Rails.root.join("log", "profiler_data")
-
-      ActiveRecord::Base.logger = ActiveRecord::Base.logger
-      ActiveRecord::Base.logger.formatter = ActiveRecordProfiler::LogFormatter.new
     end
 
     rake_tasks do

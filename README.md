@@ -34,9 +34,12 @@ Add it to your Gemfile, do `bundle install`, and add the following to any `confi
 
 Then add a new initializer, `config/initializers/active_record_profiler.rb`:
 
+    ActiveRecord::Base.logger =
+        ActiveRecordProfiler::Logger.new(ActiveRecord::Base.logger)
     ActiveRecordProfiler::LogSubscriber.attach_to :active_record
 
-This enables the profiling.
+
+The first line adds call-site information to ActiveRecord logging, and the second line enables profiling.
 
 Configuration
 =============
