@@ -1,8 +1,8 @@
 module ActiveRecordProfiler
   module ProfilerViewHelper
     def profiler_date_filter_form(page_params, options = {})
-      date    = options[:date] || page_params[:date] || Time.now.strftime(ActiveRecordProfiler::DATE_FORMAT)
-      sort_by = options[:sort] || page_params[:sort] || ActiveRecordProfiler::DURATION
+      date    = options[:date] || page_params[:date] || Time.now.strftime(ActiveRecordProfiler::Collector::DATE_FORMAT)
+      sort_by = options[:sort] || page_params[:sort] || ActiveRecordProfiler::Collector::DURATION
       
       content_tag(:form,
         [
@@ -15,8 +15,8 @@ module ActiveRecordProfiler
     end
     
     def profiler_report(page_params, options = {})
-      date      = options[:date]      || page_params[:date]     || Time.now.strftime(ActiveRecordProfiler::DATE_FORMAT)
-      sort_by   = (options[:sort]     || page_params[:sort]     || ActiveRecordProfiler::DURATION).to_i
+      date      = options[:date]      || page_params[:date]     || Time.now.strftime(ActiveRecordProfiler::Collector::DATE_FORMAT)
+      sort_by   = (options[:sort]     || page_params[:sort]     || ActiveRecordProfiler::Collector::DURATION).to_i
       max_rows  = (options[:max_rows] || page_params[:max_rows] || 100).to_i
       collector = options[:collector] || ActiveRecordProfiler::Collector.new
       
@@ -29,7 +29,7 @@ module ActiveRecordProfiler
 
       if top_locs.present?
         top_item = totals[top_locs.first]
-        max_bar = sort_by == ActiveRecordProfiler::AVG_DURATION ? (top_item[0]/top_item[1]) : top_item[sort_by]
+        max_bar = sort_by == ActiveRecordProfiler::Collector::AVG_DURATION ? (top_item[0]/top_item[1]) : top_item[sort_by]
     
         top_locs.each do |location|
           rows << content_tag(
@@ -40,29 +40,28 @@ module ActiveRecordProfiler
         end
       end
       
-      content_tag(
-        :table, [
+      content_tag(:table, {:class => options[:table]}) do 
+        [
           content_tag(:thead,
             profiler_report_header(page_params, sort_by, max_rows, options)
           ),
-          content_tag(:tbody,
-            rows
-          )
-        ],
-        {:class => options[:table]}
-      )   
+          content_tag(:tbody) do
+            rows.join.html_safe
+          end
+        ].join.html_safe
+      end  
     end
     
     def profiler_column_header_link(column_id, sort_by, page_params)
       labels = {
-        ActiveRecordProfiler::DURATION => '<b>Total Duration (s)</b>',
-        ActiveRecordProfiler::COUNT => '<b>Count</b>',
-        ActiveRecordProfiler::AVG_DURATION => '<b>Avg. Duration (ms)</b>',
-        ActiveRecordProfiler::LONGEST => '<b>Max. Duration (ms)</b>',
+        ActiveRecordProfiler::Collector::DURATION => '<b>Total Duration (s)</b>',
+        ActiveRecordProfiler::Collector::COUNT => '<b>Count</b>',
+        ActiveRecordProfiler::Collector::AVG_DURATION => '<b>Avg. Duration (ms)</b>',
+        ActiveRecordProfiler::Collector::LONGEST => '<b>Max. Duration (ms)</b>',
       }
       
       link_to_unless(sort_by == column_id, 
-        labels[column_id], 
+        labels[column_id].html_safe, 
         page_params.merge(:sort => column_id)
       )
     end
@@ -83,31 +82,33 @@ module ActiveRecordProfiler
 
       headers << content_tag(
         :th, 
-        profiler_column_header_link(ActiveRecordProfiler::DURATION, sort_by, page_params),
+        profiler_column_header_link(ActiveRecordProfiler::Collector::DURATION, sort_by, page_params),
         {:style => column_styles[:total_duration]}
       )
 
       headers << content_tag(
         :th, 
-        profiler_column_header_link(ActiveRecordProfiler::COUNT, sort_by, page_params),
+        profiler_column_header_link(ActiveRecordProfiler::Collector::COUNT, sort_by, page_params),
         {:style => column_styles[:count]}
       )
 
       headers << content_tag(
         :th, 
-        profiler_column_header_link(ActiveRecordProfiler::AVG_DURATION, sort_by, page_params),
+        profiler_column_header_link(ActiveRecordProfiler::Collector::AVG_DURATION, sort_by, page_params),
         {:style => column_styles[:average_duration]}
       )
 
       headers << content_tag(
         :th, 
-        profiler_column_header_link(ActiveRecordProfiler::LONGEST, sort_by, page_params),
+        profiler_column_header_link(ActiveRecordProfiler::Collector::LONGEST, sort_by, page_params),
         {:style => column_styles[:max_duration]}
       )
 
       headers << content_tag(:th, 'SQL for Max Duration', {:style => column_styles[:longest_sql]})
       
-      content_tag(:tr, headers, {:class => options[:header]})
+      content_tag(:tr, {:class => options[:header]}) do
+        headers.join.html_safe
+      end
     end
     
     def profiler_report_cols(location, row_data, sort_by, max_bar, options)
@@ -115,18 +116,18 @@ module ActiveRecordProfiler
 
       loc_parts = location.split(':')
       breakble_loc = loc_parts[0].gsub('/', "&#8203;/")
-      this_bar = sort_by == ActiveRecordProfiler::AVG_DURATION ? (row_data[0]/row_data[1]) : row_data[sort_by]
+      this_bar = sort_by == ActiveRecordProfiler::Collector::AVG_DURATION ? (row_data[0]/row_data[1]) : row_data[sort_by]
 
-      columns << content_tag(
-        :td, [
+      columns << content_tag(:td, {:title=>loc_parts[2]}) do
+        [
           link_to_if(
             options[:link_locations],
-            "#{breakble_loc}: #{loc_parts[1]}", 
+            "#{breakble_loc}: #{loc_parts[1]}".html_safe, 
             "javascript:showSourceFile('#{loc_parts[0]}', '#{loc_parts[1]}');"
           ),
           content_tag(:div, '', {:style=>"background-color:red; height:1.2em; width:#{100*this_bar/max_bar}%"})
-        ], {:title=>loc_parts[2]}
-      )
+        ].join.html_safe
+      end
 
       columns << content_tag(:td, number_with_precision(row_data[0], :precision => 3), {:class => "numeric"})
       columns << content_tag(:td, number_with_delimiter(row_data[1]), {:class => "numeric"})
@@ -134,7 +135,7 @@ module ActiveRecordProfiler
       columns << content_tag(:td, number_with_precision(row_data[2] * 1000, :precision => 3), {:class => "numeric"})
       columns << content_tag(:td, h(row_data[3]), {:class => "sql"})
 
-      columns.join('')
+      columns.join('').html_safe
     end
     
     def profiler_report_local_path_form
