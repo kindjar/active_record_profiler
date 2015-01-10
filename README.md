@@ -26,27 +26,33 @@ restart all of its counters/timers. The output file is named for the time
 and PID from which it was written, so that multiple processes can safely
 write their output simultaneously.
 
+Installation
+============
+Add it to your Gemfile, do `bundle install`, and add the following to any `config/environments/*.rb*` files where you want to enable the profiler (or add it to `config/application.rb` if you want it enabled everywhere) :
+
+    config.log_formatter = ActiveRecordProfiler::LogFormatter.new
+
+Then add a new initializer, `config/initializers/active_record_profiler.rb`:
+
+    ActiveRecordProfiler::LogSubscriber.attach_to :active_record
+
+This enables the profiling.
+
 Configuration
 =============
-You can configure several aspect of the profiler in an initializer (eg: `config/initializers/profiler.rb`).
-
-Control what environments the profiler runs in (default: `['development', 'staging']`)
-
-    ActiveRecordProfiler::Collector.profile_environments = %w( development )
-
 Control the (approximate) frequency of statistics flushes (default: `1.hour`)
 
     ActiveRecordProfiler::Collector.stats_flush_period = 1.hour
 
-Directory where profile data is recorded (default: `"#{RAILS_ROOT}/log/profiler_data"`)
+Directory where profile data is recorded (default: `Rails.root,join('log', 'profiler_data'`)
 
-    ActiveRecordProfiler::Collector.profile_dir = File.join(RAILS_ROOT, "log", "profiler_data")
+    ActiveRecordProfiler::Collector.profile_dir = Rails.root,join('log', 'profiler_data'
 
 Any SQL statements matching this pattern will not be tracked by the 
 profiler output, though it will still appear in the enhanced SQL logging
 (default: `/^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT)/`)
 
-    ActiveRecordProfiler::Collector.sql_ignore_pattern = /^SET /
+    ActiveRecordProfiler::Collector.sql_ignore_pattern = /^SET /x
 
 If you don't want to use the JSON gem to store your profiler data, you can
 use the FasterCSV gem instead, but due to field length constraints in 

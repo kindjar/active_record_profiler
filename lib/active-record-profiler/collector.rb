@@ -18,14 +18,9 @@ module ActiveRecordProfiler
     CSV_LONGEST = 3
     CSV_LOCATION = 4
     CSV_LONGEST_SQL = 5
-     
 
-    # You can disable the profiler by setting 
-    # ActiveRecordProfiler::Collector.profile_environments = []
-    # (default: [ 'development', 'staging' ])
-    cattr_accessor :profile_environments
-    self.profile_environments = %w( development staging )
-    
+    NON_APP_CODE_DESCRIPTION = 'Non-application code'
+         
     cattr_accessor :profiler_enabled
     self.profiler_enabled = true
     
@@ -40,7 +35,7 @@ module ActiveRecordProfiler
     # Any SQL statements matching this pattern will not be tracked by the profiler output
     # (though it will still appear in the enhanced SQL logging).
     cattr_accessor :sql_ignore_pattern
-    self.sql_ignore_pattern = /^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT)/
+    self.sql_ignore_pattern = /^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT)/i
     
     cattr_accessor :app_path_pattern
     self.app_path_pattern = Regexp.new(Regexp.quote("/app/"))
@@ -61,10 +56,6 @@ module ActiveRecordProfiler
       Thread.current[:active_record_profiler_collector] ||= Collector.new
     end
     
-    def self.profiler_enabled_for_current_env?
-      profile_environments.include?(Rails.env.to_s)
-    end
-    
     def self.profile_self?
       self.profile_self
     end
@@ -81,8 +72,8 @@ module ActiveRecordProfiler
       @profile_data_directory = self.class.profile_dir
     end
     
-    def call_location_name
-      find_app_call_location || 'Non-application code'
+    def call_location_name(caller_array = nil)
+      find_app_call_location(caller_array) || NON_APP_CODE_DESCRIPTION
     end
     
     def record_caller_info(location, seconds, sql)
@@ -193,7 +184,7 @@ module ActiveRecordProfiler
 
     protected
 
-    def find_app_call_location
+    def find_app_call_location(call_stack)
       call_stack = caller
       while frame = call_stack.shift
         if app_path_pattern.match(frame)

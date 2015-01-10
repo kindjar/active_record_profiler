@@ -17,5 +17,8 @@ if ActiveSupport::TestCase.respond_to?(:fixture_path=)
   ActiveSupport::TestCase.fixture_path = File.expand_path("../fixtures", __FILE__)
 end
 
-ActiveRecordProfiler::Collector.profile_environments = %w( test )
 ActiveRecordProfiler::Collector.app_path_pattern = Regexp.new(Regexp.quote("/test/"))
+
+# The test code is in test/, but app is in test/dummy, so we have to configure 
+# the correct trim_root_path.
+ActiveRecordProfiler::Collector.trim_root_path = "#{Rails.root.parent.expand_path}/"

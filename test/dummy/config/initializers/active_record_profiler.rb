@@ -1,0 +1,1 @@
+ActiveRecordProfiler::LogSubscriber.attach_to :active_record
