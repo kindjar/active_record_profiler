@@ -23,7 +23,6 @@ class ActiveRecordProfilerTest < ActiveSupport::TestCase
     sql = 'SELECT 1 FROM widgets'
     ActiveRecord::Base.connection.select_value(sql)
     @test_log.rewind
-    log_data = @test_log.read
     assert @collector.query_sites.present?
   end
 
