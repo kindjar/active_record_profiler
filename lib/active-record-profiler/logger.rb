@@ -2,7 +2,6 @@ require 'logger'
 
 module ActiveRecordProfiler
   class Logger < SimpleDelegator
-    attr_accessor :progname
 
     def add(severity, message = nil, progname = nil, &block)
       return true if (severity || ::Logger::Severity::UNKNOWN) < self.level
