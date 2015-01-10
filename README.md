@@ -133,14 +133,14 @@ parameters:
 An easy way to support filtering of report data by month/date/hour is to 
 use a view like this:
 
-  <%= profiler_date_filter_form(params[:date], params[:sort]) %>
+  <%= profiler_date_filter_form(params) %>
   <%= profiler_report(params) %>
   
 And if you use TextMate, then you may want to throw in some extra goodies
 to generate links to the actual source code files and lines where the SQL
 was triggered (Note: the current javascript requires jQuery):
 
-  <%= profiler_date_filter_form(params[:date], params[:sort]) %>
+  <%= profiler_date_filter_form(params) %>
   <%= profiler_report_local_path_form %>
   <%= profile_report_local_path_javascript %>
   <%= profiler_report(params, {:link_locations => true}) %>

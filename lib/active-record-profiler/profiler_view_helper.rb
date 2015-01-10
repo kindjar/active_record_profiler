@@ -1,17 +1,19 @@
 module ActiveRecordProfiler
   module ProfilerViewHelper
     def profiler_date_filter_form(page_params, options = {})
+      page_params ||= {}
+      options ||= {}
       date    = options[:date] || page_params[:date] || Time.now.strftime(ActiveRecordProfiler::Collector::DATE_FORMAT)
       sort_by = options[:sort] || page_params[:sort] || ActiveRecordProfiler::Collector::DURATION
       
-      content_tag(:form,
+      content_tag(:form) do
         [
           hidden_field_tag(:sort, sort_by),
           label_tag(:profiler_date, 'Filter by date-hour prefix (yyyy-mm-dd-hh):'),
           text_field_tag(:date, date, {:size =>10, :id => :profiler_date}),
           submit_tag('Go')
-        ]
-      )
+        ].join.html_safe
+      end
     end
     
     def profiler_report(page_params, options = {})
