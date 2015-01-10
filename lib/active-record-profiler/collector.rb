@@ -35,7 +35,7 @@ module ActiveRecordProfiler
     # Any SQL statements matching this pattern will not be tracked by the profiler output
     # (though it will still appear in the enhanced SQL logging).
     cattr_accessor :sql_ignore_pattern
-    self.sql_ignore_pattern = /^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT)/i
+    self.sql_ignore_pattern = /^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT|PRAGMA )/i
     
     cattr_accessor :app_path_pattern
     self.app_path_pattern = Regexp.new(Regexp.quote("/app/"))
