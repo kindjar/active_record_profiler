@@ -17,15 +17,15 @@ namespace "profiler" do
     if compact && prefix.nil?
       case compact
       when :date
-        prefix = 1.day.ago.strftime(ActiveRecordProfiler::DATE_FORMAT)
+        prefix = 1.day.ago.strftime(ActiveRecordProfiler::Collector::DATE_FORMAT)
       when :hour
-        prefix = 1.hour.ago.strftime(ActiveRecordProfiler::DATE_FORMAT + ActiveRecordProfiler::HOUR_FORMAT)
+        prefix = 1.hour.ago.strftime(ActiveRecordProfiler::Collector::DATE_FORMAT + ActiveRecordProfiler::HOUR_FORMAT)
       end
     end
     
     collector = ActiveRecordProfiler::Collector.new
     totals = collector.aggregate(:prefix => prefix, :compact => compact)
-    top_locs = collector.sorted_locations(ActiveRecordProfiler::DURATION, top_n)
+    top_locs = collector.sorted_locations(ActiveRecordProfiler::Collector::DURATION, top_n)
     
     top_locs.each do |loc|
       data = show_longest_sql ? totals[loc] : totals[loc][0..-2]
