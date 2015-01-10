@@ -11,7 +11,7 @@ module ActiveRecordProfiler
   require 'json'
   begin
     require 'fastercsv'
-  rescue Exception => e
+  rescue Exception
     $stderr.puts("FasterCSV not available for use in ActiveRecordProfiler")
   end
 end

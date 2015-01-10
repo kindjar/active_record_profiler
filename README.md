@@ -49,11 +49,11 @@ Control the (approximate) frequency of statistics flushes (default: `1.hour`)
 
 Directory where profile data is recorded (default: `Rails.root,join('log', 'profiler_data'`)
 
-    ActiveRecordProfiler::Collector.profile_dir = Rails.root,join('log', 'profiler_data'
+    ActiveRecordProfiler::Collector.profile_dir = Rails.root.join('log', 'profiler_data'
 
 Any SQL statements matching this pattern will not be tracked by the 
 profiler output, though it will still appear in the enhanced SQL logging
-(default: `/^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT)/`)
+(default: `/^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT|PRAGMA )/`)
 
     ActiveRecordProfiler::Collector.sql_ignore_pattern = /^SET /x
 
@@ -69,7 +69,7 @@ Reports
 To see a top-100 list of what SQL statements your application is spending its
 time in, run the following rake task:
 
-    rake profiler:aggregate RAILS_ENV=qa max_lines=100 show_sql=true
+    rake profiler:aggregate max_lines=100 show_sql=true
 
 This will return a list of the SQL which is taking the most time in your 
 application in this format:

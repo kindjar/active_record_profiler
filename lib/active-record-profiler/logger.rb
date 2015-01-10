@@ -6,7 +6,6 @@ module ActiveRecordProfiler
 
     def add(severity, message = nil, progname = nil, &block)
       return true if (severity || ::Logger::Severity::UNKNOWN) < self.level
-      # super(severity, "BAZZLE: #{progname}", progname, &block)
 
       if message.nil?
         if block_given?
@@ -22,6 +21,10 @@ module ActiveRecordProfiler
       super(severity, message, progname, &block)
     end
 
+    # Define all of the basic logging methods so that they invoke our add()
+    # method rather than delegating to the delagatee's methods, which will then
+    # invoke the delegatee's add() method that does not add call-site 
+    # information.
     [:debug, :info, :warn, :error, :fatal, :unknown].each do |level|
       define_method(level) do |progname = nil, &block|
         add(
@@ -42,7 +45,6 @@ module ActiveRecordProfiler
 
           if match
             loc = collector.call_location_name
-
             message = "#{msg} CALLED BY '#{formatted_location(loc)}'"
           end
         end
@@ -55,8 +57,11 @@ module ActiveRecordProfiler
       end
 
       def formatted_location(loc)
-        return loc unless Rails.configuration.colorize_logging
-        "\e[4;32;1m#{loc}\e[0m"
+        if Rails.configuration.colorize_logging
+          "\e[4;32;1m#{loc}\e[0m"
+        else
+          loc
+        end
       end
 
   end
