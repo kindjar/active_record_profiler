@@ -78,6 +78,7 @@ If you want programmatic access to the profiler data, check out the source code 
 =======
 HTML Reports
 ============
+**Note:** The helpers below will eventually be moved into a Rails Engine that you can simply mount within your application, either within an admin-authenticated area or perhaps only for your development/staging environments.  **In any case you don't want this interface available to the general public**.
 
 The profiler includes some view helpers to make it easy for your application to generate a sortable HTML table of profiler information. The core helper method generates a table based on an `ActiveRecordProfiler::Collector` object. In its simplest form, it can be called from a view like this:
 
