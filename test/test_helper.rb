@@ -1,18 +1,24 @@
-ENV['RAILS_ENV'] = 'test'
-ENV['RAILS_ROOT'] ||= File.dirname(__FILE__) + '/../../../..'
+# Configure Rails Environment
+ENV["RAILS_ENV"] = "test"
 
-require 'test/unit'
-require File.expand_path(File.join(ENV['RAILS_ROOT'], 'config/environment.rb'))
+require File.expand_path("../../test/dummy/config/environment.rb",  __FILE__)
+ActiveRecord::Migrator.migrations_paths = [File.expand_path("../../test/dummy/db/migrate", __FILE__)]
+require "rails/test_help"
 
-ActiveRecordProfiler::Collector.profile_environments = %w( test )
+# Filter out Minitest backtrace while allowing backtrace from other libraries
+# to be shown.
+Minitest.backtrace_filter = Minitest::BacktraceFilter.new
+
+# Load support files
+Dir["#{File.dirname(__FILE__)}/support/**/*.rb"].each { |f| require f }
+
+# Load fixtures from the engine
+if ActiveSupport::TestCase.respond_to?(:fixture_path=)
+  ActiveSupport::TestCase.fixture_path = File.expand_path("../fixtures", __FILE__)
+end
+
 ActiveRecordProfiler::Collector.app_path_pattern = Regexp.new(Regexp.quote("/test/"))
 
-$test_config = YAML::load(IO.read(File.dirname(__FILE__) + '/database.yml'))
-
-load(File.dirname(__FILE__) + "/schema.rb")
-
-# Once the plugin is installed, don't want to run init.rb again...
-# require File.dirname(__FILE__) + '/../init.rb'
-
-class DummyLog < ActiveRecord::Base
-end
+# The test code is in test/, but app is in test/dummy, so we have to configure 
+# the correct trim_root_path.
+ActiveRecordProfiler::Collector.trim_root_path = "#{Rails.root.parent.expand_path}/"

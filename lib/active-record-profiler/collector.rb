@@ -1,40 +1,26 @@
-# ActiveRecordProfiler
-
 module ActiveRecordProfiler
-  require 'fileutils'
-  require 'json'
-  begin
-    require 'fastercsv'
-  rescue Exception => e
-    RAILS_DEFAULT_LOGGER.debug("FasterCSV not available for use in ActiveRecordProfiler")
-  end
-  
-  DURATION = 0
-  COUNT = 1
-  LONGEST = 2
-  LONGEST_SQL = 3
-  LOCATION = -1
-  AVG_DURATION = -2
-  
-  DATE_FORMAT = '%Y-%m-%d'
-  HOUR_FORMAT = '-%H'
-  DATETIME_FORMAT = DATE_FORMAT + HOUR_FORMAT + '-%M'
-  AGGREGATE_QUIET_PERIOD = 1.minutes
-  
-  CSV_DURATION = 0
-  CSV_COUNT = 1
-  CSV_AVG = 2
-  CSV_LONGEST = 3
-  CSV_LOCATION = 4
-  CSV_LONGEST_SQL = 5
-  
   class Collector
-    # You can disable the profiler by setting 
-    # ActiveRecordProfiler::Collector.profile_environments = []
-    # (default: [ 'development', 'staging' ])
-    cattr_accessor :profile_environments
-    self.profile_environments = %w( development staging )
+    DURATION = 0
+    COUNT = 1
+    LONGEST = 2
+    LONGEST_SQL = 3
+    LOCATION = -1
+    AVG_DURATION = -2
     
+    DATE_FORMAT = '%Y-%m-%d'
+    HOUR_FORMAT = '-%H'
+    DATETIME_FORMAT = DATE_FORMAT + HOUR_FORMAT + '-%M'
+    AGGREGATE_QUIET_PERIOD = 1.minutes
+    
+    CSV_DURATION = 0
+    CSV_COUNT = 1
+    CSV_AVG = 2
+    CSV_LONGEST = 3
+    CSV_LOCATION = 4
+    CSV_LONGEST_SQL = 5
+
+    NON_APP_CODE_DESCRIPTION = 'Non-application code'
+         
     cattr_accessor :profiler_enabled
     self.profiler_enabled = true
     
@@ -45,18 +31,16 @@ module ActiveRecordProfiler
     
     # Directory where profile data is recorded
     cattr_accessor :profile_dir
-    self.profile_dir = File.join(RAILS_ROOT, "log", "profiler_data")
 
     # Any SQL statements matching this pattern will not be tracked by the profiler output
     # (though it will still appear in the enhanced SQL logging).
     cattr_accessor :sql_ignore_pattern
-    self.sql_ignore_pattern = /^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT)/
+    self.sql_ignore_pattern = /^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT|PRAGMA )/i
     
     cattr_accessor :app_path_pattern
     self.app_path_pattern = Regexp.new(Regexp.quote("/app/"))
     
     cattr_accessor :trim_root_path
-    self.trim_root_path = RAILS_ROOT[-1] == "/" ? RAILS_ROOT : RAILS_ROOT + "/"
     
     cattr_accessor :storage_backend
     self.storage_backend = :json    # or :fastercsv
@@ -70,10 +54,6 @@ module ActiveRecordProfiler
     
     def self.instance
       Thread.current[:active_record_profiler_collector] ||= Collector.new
-    end
-    
-    def self.profiler_enabled?
-      profile_environments.include?(ENV['RAILS_ENV'])
     end
     
     def self.profile_self?
@@ -92,8 +72,8 @@ module ActiveRecordProfiler
       @profile_data_directory = self.class.profile_dir
     end
     
-    def call_location_name
-      find_app_call_location || 'Non-application code'
+    def call_location_name(caller_array = nil)
+      find_app_call_location(caller_array) || NON_APP_CODE_DESCRIPTION
     end
     
     def record_caller_info(location, seconds, sql)
@@ -116,7 +96,7 @@ module ActiveRecordProfiler
       thread_id = Thread.current.object_id
       flush_time = Time.now
       site_count = self.query_sites.keys.size
-      RAILS_DEFAULT_LOGGER.info("Flushing ActiveRecordProfiler statistics for PID #{pid} THR #{thread_id} at #{flush_time} (#{site_count} sites).")
+      Rails.logger.info("Flushing ActiveRecordProfiler statistics for PID #{pid} at #{flush_time} (#{site_count} sites).")
       
       if (site_count > 0)
         FileUtils.makedirs(self.profile_data_directory)
@@ -164,7 +144,7 @@ module ActiveRecordProfiler
             RAILS_DEFAULT_LOGGER.warn "Unable to read file #{filename}: #{e.message}"
           end
         else
-          RAILS_DEFAULT_LOGGER.info "Skipping file #{filename} because it is too new and may still be open for writing."
+          Rails.logger.info "Skipping file #{filename} because it is too new and may still be open for writing."
         end
       end
 
@@ -204,7 +184,7 @@ module ActiveRecordProfiler
 
     protected
 
-    def find_app_call_location
+    def find_app_call_location(call_stack)
       call_stack = caller
       while frame = call_stack.shift
         if app_path_pattern.match(frame)
@@ -313,41 +293,4 @@ module ActiveRecordProfiler
       end
     end
   end
-  
-  def self.included(base)    
-    base.class_eval do
-      
-      def log_info_with_caller_tracking(sql, name, seconds)
-        if ActiveRecordProfiler::Collector.profiler_enabled?
-          start_time = Time.now.to_f
-          retval = nil
-          begin
-            collector = ActiveRecordProfiler::Collector.instance
-            loc = collector.call_location_name
-            collector.record_caller_info(loc, seconds, sql.strip)
-            
-            loc = "\e[4;32;1m#{loc}\e[0m" if ActiveRecord::Base.colorize_logging
-            collector.record_self_info((Time.now.to_f - start_time), 'updating profiler stats') if ActiveRecordProfiler::Collector.profile_self?
-            retval = log_info_without_caller_tracking(sql + " CALLED BY '#{loc}'", name, seconds)
-
-            start = Time.now.to_f
-            if collector.should_flush_stats?
-              collector.flush_query_sites_statistics 
-              collector.record_self_info((Time.now.to_f - start_time), 'flushing profiler stats') if ActiveRecordProfiler::Collector.profile_self?
-            end
-          rescue Exception => e
-            RAILS_DEFAULT_LOGGER.error("Caught exception in ActiveRecordProfiler: #{e} at #{e.backtrace.first}")
-            retval = log_info_without_caller_tracking(sql, name, seconds)
-          end
-          
-          return retval
-        else
-          log_info_without_caller_tracking(sql, name, seconds)
-        end
-      end
-      alias_method_chain :log_info, :caller_tracking
-      
-    end
-  end
 end
-

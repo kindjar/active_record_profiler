@@ -1,23 +1,14 @@
-require 'rake'
+require "bundler"
 require 'rake/testtask'
-require 'rake/rdoctask'
 
-desc 'Default: run unit tests.'
-task :default => :test
-
-desc 'Test the active_record_profiler plugin.'
-Rake::TestTask.new(:test) do |t|
+Rake::TestTask.new do |t|
   t.libs << 'lib'
   t.libs << 'test'
   t.pattern = 'test/**/*_test.rb'
-  t.verbose = true
+  t.verbose = false
 end
 
-desc 'Generate documentation for the active_record_profiler plugin.'
-Rake::RDocTask.new(:rdoc) do |rdoc|
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title    = 'ActiveRecordProfiler'
-  rdoc.options << '--line-numbers' << '--inline-source'
-  rdoc.rdoc_files.include('README')
-  rdoc.rdoc_files.include('lib/**/*.rb')
-end
+desc "Run tests"
+task :default => :test
+
+Bundler::GemHelper.install_tasks
