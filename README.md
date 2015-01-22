@@ -103,44 +103,44 @@ HTML Reports
 
 The profiler includes some view helpers to make it easy for your application
 to generate a sortable HTML table of profiler information. The core helper
-method generates a table based on an ActiveRecordProfiler::Collector object.
+method generates a table based on an `ActiveRecordProfiler::Collector` object.
 In its simplest form, it can be called from a view like this:
 
-  <div id="#profiler">
-    <%= profiler_report(params) %>
-  </div>
+    <div id="#profiler">
+      <%= profiler_report(params) %>
+    </div>
   
-The full set of parameters available looks like this:
+You can also set up a bunch of options by passing a set of configuration keys:
 
-  profiler_report(page_parameters, date_prefix, sort_id, max_rows, profiler_collector, css_options)
+    profiler_report(params, options)
   
-parameters:
-  page_parameters: this is generally the request parameters, used to build the report-sorting links (HashWithIndifferentAccess)
-  options: hash containing optional settings for the report; supported keys:
-  
-    :date : year, year-month, year-month-day, year-month-day-hour used to filter the profiler data; defaults to Today (String)
-    :sort : ActiveRecordProfiler::(DURATION|COUNT|LONGEST|AVG_DURATION) specifying which field to sort the report by; defaults to DURATION (Constant/Integer)
-    :max_rows : Maximum number of table rows to output; in other words, report on the top max_rows SQL statements; defaults to 100 (Integer)
-    :collector : object representing the profile data to use in building the report; defaults to an empty collector using the configured profile data directory (ActiveRecordProfiler::Collector )
-    :table : css class applied to the report <table> element; defaults to nil
-    :header_row : css class applied to the report's header row; defaults to nil
-    :row : css class applied to the report's data rows; defaults to nil
-    :link_locations : true/false value indicating whether to build textmate links to the source code whence a given piece of SQL came; defaults to false
+The available options include:
+
+Key | Description
+--- | -----------
+:date | year, year-month, year-month-day, year-month-day-hour used to filter the profiler data; defaults to `Today` (String)
+:sort | ActiveRecordProfiler::(`DURATION`&#124;`COUNT`&#124;`LONGEST`&#124;`AVG_DURATION`) specifying which field to sort the report by; defaults to `DURATION` (Constant/Integer)
+:max_rows | Maximum number of table rows to output; in other words, report on the top max_rows SQL statements; defaults to 100 (Integer)
+:collector | object representing the profile data to use in building the report; defaults to an empty collector using the configured profile data directory (`ActiveRecordProfiler::Collector`)
+:table | css class applied to the report &lt;table&gt; element; defaults to `nil`
+:header_row | css class applied to the report's header row; defaults to `nil`
+:row | css class applied to the report's data rows; defaults to `nil`
+:link_locations | `true`/`false` value indicating whether to build textmate links to the source code whence a given piece of SQL came; defaults to false
   
 An easy way to support filtering of report data by month/date/hour is to 
 use a view like this:
 
-  <%= profiler_date_filter_form(params) %>
-  <%= profiler_report(params) %>
+    <%= profiler_date_filter_form(params) %>
+    <%= profiler_report(params) %>
   
 And if you use TextMate, then you may want to throw in some extra goodies
 to generate links to the actual source code files and lines where the SQL
 was triggered (Note: the current javascript requires jQuery):
 
-  <%= profiler_date_filter_form(params) %>
-  <%= profiler_report_local_path_form %>
-  <%= profile_report_local_path_javascript %>
-  <%= profiler_report(params, {:link_locations => true}) %>
+    <%= profiler_date_filter_form(params) %>
+    <%= profiler_report_local_path_form %>
+    <%= profile_report_local_path_javascript %>
+    <%= profiler_report(params, {:link_locations => true}) %>
 
 
 Miscellaneous
