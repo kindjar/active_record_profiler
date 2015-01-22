@@ -43,7 +43,7 @@ Control the (approximate) frequency of statistics flushes (default: `1.hour`)
 
     ActiveRecordProfiler::Collector.stats_flush_period = 1.hour
 
-Note that only flushed data is available for use in the rake reports (described below). If you are running a multithreaded or multiprocess server (which covers most common rails server types), your data will be incomplete until all those threads/processes/servers have flushed their data. This limitation exists mostly to avoid the overhead of coordination/locking during data capture.
+Note that only flushed data is available for use in the rake reports (described below). If you are running a multithreaded or multiprocess server (which covers most common rails server types), your data will be incomplete until all those threads/processes/servers have flushed their data. This limitation exists primarily to avoid the overhead of coordinating/locking during the process of serving your application's web requests.
 
 Directory where profile data is recorded (default: `Rails.root,join('log', 'profiler_data'`)
 
