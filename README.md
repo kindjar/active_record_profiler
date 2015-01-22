@@ -43,6 +43,8 @@ Control the (approximate) frequency of statistics flushes (default: `1.hour`)
 
     ActiveRecordProfiler::Collector.stats_flush_period = 1.hour
 
+Note that only flushed data is available for use in the rake reports (described below). If you are running a multithreaded or multiprocess server (which covers most common rails server types), your data will be incomplete until all those threads/processes/servers have flushed their data. This limitation exists mostly to avoid the overhead of coordination/locking during data capture.
+
 Directory where profile data is recorded (default: `Rails.root,join('log', 'profiler_data'`)
 
     ActiveRecordProfiler::Collector.profile_dir = Rails.root.join('log', 'profiler_data'
@@ -52,12 +54,6 @@ profiler output, though it will still appear in the enhanced SQL logging
 (default: `/^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT|PRAGMA )/`)
 
     ActiveRecordProfiler::Collector.sql_ignore_pattern = /^SET /x
-
-If you don't want to use the JSON gem to store your profiler data, you can
-use the FasterCSV gem instead, but due to field length constraints in 
-FasterCSV's parsing code, some of your SQL may be truncated.
-
-    ActiveRecordProfiler::Collector.storage_backend = :fastercsv
 
 
 Reports
