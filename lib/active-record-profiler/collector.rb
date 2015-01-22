@@ -43,7 +43,7 @@ module ActiveRecordProfiler
     cattr_accessor :trim_root_path
     
     cattr_accessor :storage_backend
-    self.storage_backend = :json    # or :fastercsv
+    self.storage_backend = :json
     
     cattr_accessor :profile_self
     self.profile_self = false
@@ -210,7 +210,7 @@ module ActiveRecordProfiler
     end
     
     def detect_file_type(filename)
-      type = :fastercsv
+      type = nil
       File.open(filename, "r") do |io|
         first_line = io.readline
         if first_line.match(/^\/\* JSON \*\//)
@@ -222,22 +222,10 @@ module ActiveRecordProfiler
     
     def write_file(filename)
       case storage_backend
-      when :fastercsv
-        write_fastercsv_file(filename)
       when :json
         write_json_file(filename)
       else
         raise "Invalid storage_backend: #{storage_backend}"
-      end
-    end
-    
-    def write_fastercsv_file(filename)
-      FasterCSV.open(filename, "w") do |csv|
-        csv << ['Duration', 'Count', 'Avg. Duration', 'Max. Duration', 'Location', 'Max. Duration SQL']
-        self.query_sites.each_pair do |location, info|
-          # Trim SQL down if it's huge -- otherwise we can trigger exceptions when FasterCSV tries to parse via Regexps
-          csv << [info[DURATION], info[COUNT], (info[DURATION]/info[COUNT]), info[LONGEST], location, info[LONGEST_SQL]]
-        end
       end
     end
     
@@ -272,19 +260,11 @@ module ActiveRecordProfiler
     def read_file(filename)
       file_type = detect_file_type filename
       case file_type
-      when :fastercsv
-        read_fastercsv_file(filename) { |row| yield row }
       when :json
         read_json_file(filename) { |row| yield row }
       else
         raise "Unknown profiler data file type for file '#{filename}: #{file_type}"
       end
-    end
-    
-    def read_fastercsv_file(filename)
-      FasterCSV.foreach(filename, :headers => :first_row) do |row|
-        yield row
-      end      
     end
     
     def read_json_file(filename)

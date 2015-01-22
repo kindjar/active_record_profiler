@@ -9,10 +9,5 @@ require 'active-record-profiler/railtie' if defined?(Rails)
 module ActiveRecordProfiler
   require 'fileutils'
   require 'json'
-  begin
-    require 'fastercsv'
-  rescue Exception
-    $stderr.puts("FasterCSV not available for use in ActiveRecordProfiler")
-  end
 end
 
