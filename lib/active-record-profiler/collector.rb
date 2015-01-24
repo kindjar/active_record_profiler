@@ -35,15 +35,22 @@ module ActiveRecordProfiler
     # (though it will still appear in the enhanced SQL logging).
     cattr_accessor :sql_ignore_pattern
     
+    # Any locations matching this pattern will be considered part of the 
+    # application. Any locations NOT matching will be lumped under a single
+    # 'Non-application code' entry.
     cattr_accessor :app_path_pattern
     
+    # This prefix will be removed from location names, for brevity.
     cattr_accessor :trim_root_path
     
+    # Controls whether or not to record profiling data for time spent in the
+    # profiler code itself.
+    cattr_accessor :profile_self
+
+    # Obsolete, but still referenced
     cattr_accessor :storage_backend
     self.storage_backend = :json
     
-    cattr_accessor :profile_self
-
     attr_accessor :last_stats_flush
     attr_accessor :query_sites
     attr_accessor :profile_data_directory

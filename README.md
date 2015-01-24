@@ -38,14 +38,29 @@ Control the (approximate) frequency of statistics flushes (default: `1.hour`)
 Note that only flushed data is available for use in the rake reports (described below). If you are running a multithreaded or multiprocess server (which covers most common rails server types), your data will be incomplete until all those threads/processes/servers have flushed their data. This limitation exists primarily to avoid the overhead of coordinating/locking during the process of serving your application's web requests.
 
 ## profile_dir ##
-Directory where profile data is recorded (default: `Rails.root,join('log', 'profiler_data'`)
+Directory where profile data is recorded. (default: `Rails.root,join('log', 'profiler_data'`)
 
     ActiveRecordProfiler.profile_dir = Rails.root.join('log', 'profiler_data'
 
 ## sql_ignore_pattern ##
-Any SQL statements matching this pattern will not be tracked by the profiler output, though it will still appear in the enhanced SQL logging (default: `/^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT|PRAGMA )/`)
+Any SQL statements matching this pattern will not be tracked by the profiler output, though it will still appear in the enhanced SQL logging. (default: `/^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT|PRAGMA )/`)
 
     ActiveRecordProfiler.sql_ignore_pattern = /^SET /x
+
+## app_path_pattern ##
+ Any calling location that matches this pattern will be tracked individually. Any locations that do __not__ match will be grouped under a single `Non-application code` label. The default only includes the `app`, `lib`, and `vendor` directories, but that's usually suitable and avoids noise. (default: `Regexp.new(Regexp.quote("#{Rails.root.expand_path}/") + "(:?app|lib|vendor)/")`)
+
+    ActiveRecordProfiler.app_path_pattern = Regexp.new(Regexp.quote("#{Rails.root.expand_path}/"))
+
+## trim_root_path ##
+This prefix will be removed from the calling site filepath for brevity. (default: `"#{Rails.root.expand_path}/"`)
+
+    ActiveRecordProfiler.trim_root_path = "#{Rails.root.parent.expand_path}/app"
+
+## profile_self ##
+This setting controls whether the profiler records information about how much time was spent in the profiling code itself. If you want to know what kind of overhead the profiler is adding, set this to true. (default: `false`)
+
+    ActiveRecordProfiler.profile_self = true
 
 
 ## link_location ##
