@@ -69,8 +69,8 @@ Whether or not to make the locations in the profiler reports into source code li
     ActiveRecordProfiler.link_location = true
 
 
-Reports
-=======
+Command Line Reports
+====================
 To see a top-100 list of what SQL statements your application is spending its time in, run the following rake task:
 
     rake profiler:aggregate max_lines=100 show_sql=true
@@ -96,8 +96,8 @@ You can clear out all profiler data using the following command:
 If you want programmatic access to the profiler data, check out the source code for the rake tasks in `lib/active-record-profiler/tasks.rake`.
 
 
-HTML Reports
-============
+Web Reports
+===========
 
 The `active-record-profiler` gem also includes support for producing reports in your browser. In order to make it available, you'll want to mount the engine within your application's `routes.rb`. Since you don't want the public to have access to your profiler reports, you'll want to limit access to it. You could only mount the profiler's web interface in the development environment:
 
