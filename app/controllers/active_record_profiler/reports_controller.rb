@@ -1,5 +1,5 @@
 module ActiveRecordProfiler
-  class ReportsController < ApplicationController
+  class ReportsController < ActiveRecordProfiler::ApplicationController
     include ReportsHelper
 
     def index
