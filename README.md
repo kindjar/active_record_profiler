@@ -33,19 +33,25 @@ Configuration
 ## stats_flush_period ##
 Control the (approximate) frequency of statistics flushes (default: `1.hour`)
 
-    ActiveRecordProfiler::Collector.stats_flush_period = 1.hour
+    ActiveRecordProfiler.stats_flush_period = 1.hour
 
 Note that only flushed data is available for use in the rake reports (described below). If you are running a multithreaded or multiprocess server (which covers most common rails server types), your data will be incomplete until all those threads/processes/servers have flushed their data. This limitation exists primarily to avoid the overhead of coordinating/locking during the process of serving your application's web requests.
 
 ## profile_dir ##
 Directory where profile data is recorded (default: `Rails.root,join('log', 'profiler_data'`)
 
-    ActiveRecordProfiler::Collector.profile_dir = Rails.root.join('log', 'profiler_data'
+    ActiveRecordProfiler.profile_dir = Rails.root.join('log', 'profiler_data'
 
 ## sql_ignore_pattern ##
 Any SQL statements matching this pattern will not be tracked by the profiler output, though it will still appear in the enhanced SQL logging (default: `/^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT|PRAGMA )/`)
 
-    ActiveRecordProfiler::Collector.sql_ignore_pattern = /^SET /x
+    ActiveRecordProfiler.sql_ignore_pattern = /^SET /x
+
+
+## link_location ##
+Whether or not to make the locations in the profiler reports into source code links (only works with editors that can be launched via URL scheme) (default: `false`):
+
+    ActiveRecordProfiler.link_location = true
 
 
 Reports
@@ -75,46 +81,20 @@ You can clear out all profiler data using the following command:
 If you want programmatic access to the profiler data, check out the source code for the rake tasks in `lib/active-record-profiler/tasks.rake`.
 
 
-=======
 HTML Reports
 ============
-**Note:** The helpers below will eventually be moved into a Rails Engine that you can simply mount within your application, either within an admin-authenticated area or perhaps only for your development/staging environments.  **In any case you don't want this interface available to the general public**.
 
-The profiler includes some view helpers to make it easy for your application to generate a sortable HTML table of profiler information. The core helper method generates a table based on an `ActiveRecordProfiler::Collector` object. In its simplest form, it can be called from a view like this:
+The `active-record-profiler` gem also includes support for producing reports in your browser. In order to make it available, you'll want to mount the engine within your application's `routes.rb`. Since you don't want the public to have access to your profiler reports, you'll want to limit access to it. You could only mount the profiler's web interface in the development environment:
 
-    <div id="#profiler">
-      <%= profiler_report(params) %>
-    </div>
-  
-You can also set up a bunch of options by passing a set of configuration keys:
+    mount ActiveRecordProfiler::Engine => "/profiler"  if Rails.env.development?
 
-    profiler_report(params, options)
-  
-The available options include:
+Or, if you are using [Devise](https://github.com/plataformatec/devise) and have an admin flag on a `User` model, for example:
 
-Key | Description
---- | -----------
-:date | year, year-month, year-month-day, year-month-day-hour used to filter the profiler data; defaults to `Today` (String)
-:sort | ActiveRecordProfiler::(`DURATION`&#124;`COUNT`&#124;`LONGEST`&#124;`AVG_DURATION`) specifying which field to sort the report by; defaults to `DURATION` (Constant/Integer)
-:max_rows | Maximum number of table rows to output; in other words, report on the top max_rows SQL statements; defaults to 100 (Integer)
-:collector | object representing the profile data to use in building the report; defaults to an empty collector using the configured profile data directory (`ActiveRecordProfiler::Collector`)
-:table | css class applied to the report &lt;table&gt; element; defaults to `nil`
-:header_row | css class applied to the report's header row; defaults to `nil`
-:row | css class applied to the report's data rows; defaults to `nil`
-:link_locations | `true`/`false` value indicating whether to build textmate links to the source code whence a given piece of SQL came; defaults to false
-  
-An easy way to support filtering of report data by month/date/hour is to use a view like this:
+    authenticated :user, -> user { user.admin? } do
+      mount ActiveRecordProfiler::Engine => "/profiler"
+    end
 
-    <%= profiler_date_filter_form(params) %>
-    <%= profiler_report(params) %>
-  
-And if you use TextMate, then you may want to throw in some extra goodies to generate links to the actual source code files and lines where the SQL was triggered (Note: the current javascript requires jQuery):
-
-    <%= profiler_date_filter_form(params) %>
-    <%= profiler_report_local_path_form %>
-    <%= profile_report_local_path_javascript %>
-    <%= profiler_report(params, {:link_locations => true}) %>
-
+When you visit the path where you've mounted the web interface, you will by default see a report for the current day. If you just installed `active-record-profiler`, there probably won't be anything there yet, in which case you should go play with your app for a while and come back later. :) Also note that if the web server you are using has multiple processes or threads, you won't see data from those other processes/threads until they dump their data.
 
 Miscellaneous
 =============

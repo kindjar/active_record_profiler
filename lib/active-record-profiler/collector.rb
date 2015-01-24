@@ -27,7 +27,6 @@ module ActiveRecordProfiler
     # You can control the (approximate) frequency of statistics flushes by setting
     # ActiveRecordProfiler::Collector.stats_flush_period = 1.hour
     cattr_accessor :stats_flush_period
-    self.stats_flush_period = 1.hour
     
     # Directory where profile data is recorded
     cattr_accessor :profile_dir
@@ -35,10 +34,8 @@ module ActiveRecordProfiler
     # Any SQL statements matching this pattern will not be tracked by the profiler output
     # (though it will still appear in the enhanced SQL logging).
     cattr_accessor :sql_ignore_pattern
-    self.sql_ignore_pattern = /^(SHOW FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT|PRAGMA )/i
     
     cattr_accessor :app_path_pattern
-    self.app_path_pattern = Regexp.new(Regexp.quote("/app/"))
     
     cattr_accessor :trim_root_path
     
@@ -46,7 +43,6 @@ module ActiveRecordProfiler
     self.storage_backend = :json
     
     cattr_accessor :profile_self
-    self.profile_self = false
 
     attr_accessor :last_stats_flush
     attr_accessor :query_sites
