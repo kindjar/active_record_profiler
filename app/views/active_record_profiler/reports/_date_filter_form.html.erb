@@ -1,0 +1,6 @@
+<form>
+  <%= hidden_field_tag :sort, @report_options[:sort] %>
+  <label for="profiler_date">Filter by date-hour prefix (yyyy-mm-dd-hh):</label>
+  <%= text_field_tag :date, @report_options[:date], {:size =>10, :id => :profiler_date} %>
+  <input name="commit" type="submit" value="Go">
+</form>

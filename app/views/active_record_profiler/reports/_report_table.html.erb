@@ -1,0 +1,51 @@
+<table class="profiler-report">
+  <thead>
+    <tr>
+      <th class="location">Location</th>
+      <th class="duration">
+        <%= report_column_header_link(ActiveRecordProfiler::Collector::DURATION, @report_options[:sort], 'Total Duration (s)', params) %>
+      </th>
+      <th class="count">
+        <%= report_column_header_link(ActiveRecordProfiler::Collector::COUNT, @report_options[:sort], 'Count', params) %>
+      </th>
+      <th class="average-duration">
+        <%= report_column_header_link(ActiveRecordProfiler::Collector::AVG_DURATION, @report_options[:sort], 'Avg. Duration (ms)', params) %>
+      </th>
+      <th class="max-duration">
+        <%= report_column_header_link(ActiveRecordProfiler::Collector::LONGEST, @report_options[:sort], 'Max. Duration (ms)', params) %>          
+      </th>
+      <th class="max-duration-sql">SQL for Max Duration</th>
+    </tr>
+  </thead>
+  <tbody>
+  <% @top_locations.each do |location| -%>
+    <tr>
+      <% 
+        item = @totals[location]
+        path, line_number, method = location.split(':') 
+        this_bar = bar_value(@report_options[:sort], item)
+        bar_width = 100 * this_bar / @max_bar_value
+      -%>
+      <td title="#{method}">
+        <%= link_to_if(@report_options[:link_location], location_description(path, line_number), "#") %>
+        <div class="rank-bar" style="width:<%= bar_width %>%"></div>
+      </td>
+      <td class="numeric">
+        <%= number_with_precision(item[ActiveRecordProfiler::Collector::DURATION], :precision => 3) %>
+      </td>
+      <td class="numeric">
+        <%= number_with_delimiter(item[ActiveRecordProfiler::Collector::COUNT]) %>
+      </td>
+      <td class="numeric">
+        <%= number_with_precision(item[ActiveRecordProfiler::Collector::DURATION] / item[ActiveRecordProfiler::Collector::COUNT] * 1000, :precision => 3) %>
+      </td>
+      <td class="numeric">
+        <%= number_with_precision(item[ActiveRecordProfiler::Collector::LONGEST] * 1000, :precision => 3) %>
+      </td>
+      <td class="sql">
+        <%= item[ActiveRecordProfiler::Collector::LONGEST_SQL] %>
+      </td>
+    </tr>
+  <% end -%>
+  </tbody>
+</table>

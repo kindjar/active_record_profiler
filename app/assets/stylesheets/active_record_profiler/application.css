@@ -1,0 +1,44 @@
+.profiler-report th, .profiler-report td {
+  vertical-align: top;
+}
+
+.profiler-report th {
+  font-weight: bold;
+}
+
+.profiler-report th.location {
+  width: 19%;
+}
+
+.profiler-report th.total-duration {
+  width: 6%;
+}
+.profiler-report th.count {
+  width: 6%;
+}
+
+.profiler-report th.average-duration {
+  width: 6%;
+}
+
+.profiler-report th.max-duration {
+  width: 6%;
+}
+
+.profiler-report th.max-duration-sql {
+  width: 57%;
+}
+
+.profiler-report .rank-bar {
+  background-color: red; 
+  height: 1.2em;
+}
+
+.profiler-report td.numeric {
+  text-align: right;
+}
+
+.profiler-report td.sql {
+  font-family: monospace;
+  padding-left: 15px;
+}
