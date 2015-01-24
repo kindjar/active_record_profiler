@@ -47,6 +47,11 @@ var ActiveRecordProfiler = (function (my_module) {
     profilerSourceRootField.change(function(e){
       setDBProfSourceRoot($(this).val());
     });
+
+    $('.profiler-report').on('click', '.source-link', function (event) {
+      var link = $(this);
+      my_module.showSourceFile(link.data('file'), link.data('line'));
+    });
   });
 
   return my_module;
