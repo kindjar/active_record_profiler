@@ -1,4 +1,11 @@
 <form>
   <label for="source_root">Local source path (for location links):</label>
   <input id="source_root" name="source_root" size="50" type="text" value="<%= Rails.root %>">
+  <br />
+  <label for="source_root">Editor (for location links):</label>
+  <select id="source_editor">
+    <option value="">None</option>
+    <option value="subl">Sublime Text</option>
+    <option value="txmt">TextMate</option>
+  </select>
 </form>
