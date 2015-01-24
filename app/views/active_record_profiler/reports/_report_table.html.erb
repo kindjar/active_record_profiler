@@ -26,7 +26,7 @@
         this_bar = bar_value(@report_options[:sort], item)
         bar_width = 100 * this_bar / @max_bar_value
       -%>
-      <td title="#{method}">
+      <td title="<%= location %>">
         <%= link_to_if(@report_options[:link_location], location_description(path, line_number), "#", :class => 'source-link', :data => {file: path, line: line_number}) %>
         <div class="rank-bar" style="width:<%= bar_width %>%"></div>
       </td>
