@@ -1,8 +1,21 @@
+.profiler-report {
+  border: solid 1px gray;
+  border-collapse: collapse;
+  margin-top: 5px;
+}
+
 .profiler-report th, .profiler-report td {
   vertical-align: top;
+  padding: 3px;
+}
+
+.profiler-report thead {
+  border: solid 1px gray;
+  background: #c9e6ec;
 }
 
 .profiler-report th {
+  vertical-align: middle;
   font-weight: bold;
 }
 
@@ -29,6 +42,10 @@
   width: 57%;
 }
 
+.profiler-report tbody tr:nth-child(even) {
+  background-color: #eee;
+}
+
 .profiler-report .rank-bar {
   background-color: red; 
   height: 1.2em;
@@ -40,5 +57,5 @@
 
 .profiler-report td.sql {
   font-family: monospace;
-  padding-left: 15px;
+  padding-left: 10px;
 }
