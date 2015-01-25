@@ -7,9 +7,11 @@ module ActiveRecordProfiler
       return true if (severity || ::Logger::Severity::UNKNOWN) < self.level
       start_time = Time.now.to_f
 
+      called_block = false
       if message.nil?
         if block_given?
           message = yield
+          called_block = true
         else
           message = progname
           progname = self.progname
@@ -19,7 +21,16 @@ module ActiveRecordProfiler
       message = add_call_site_to_message(message)
       collector.record_self_info((Time.now.to_f - start_time), 'enhancing log line') if ActiveRecordProfiler::Collector.profile_self?
 
-      super(severity, message, progname, &block)
+      # We don't use super() here to pass control to the delegate because if we 
+      # do, there's no way to prevent super() from seeing the block and yielding
+      # to it, and if we've already yielded to the block, this could result in a
+      # double yield (if the message is nil after calling the block).
+      if called_block
+        # don't pass the block, since we already called it
+        __getobj__.add(severity, message, progname)
+      else  
+        __getobj__.add(severity, message, progname, &block)
+      end
     end
 
     # Define all of the basic logging methods so that they invoke our add()
