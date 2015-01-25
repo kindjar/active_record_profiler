@@ -5,6 +5,7 @@ module ActiveRecordProfiler
 
     def add(severity, message = nil, progname = nil, &block)
       return true if (severity || ::Logger::Severity::UNKNOWN) < self.level
+      start_time = Time.now.to_f
 
       if message.nil?
         if block_given?
@@ -16,6 +17,7 @@ module ActiveRecordProfiler
       end
 
       message = add_call_site_to_message(message)
+      collector.record_self_info((Time.now.to_f - start_time), 'enhancing log line') if ActiveRecordProfiler::Collector.profile_self?
 
       super(severity, message, progname, &block)
     end
