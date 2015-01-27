@@ -2,6 +2,7 @@
 
 * Add self-profiling for the logger component
 * Prevent calling a logger.add block twice in the unusual case where the block returns a nil message.
+* Convert duration from milliseconds to seconds (doh!)
 
 # 1.0
 

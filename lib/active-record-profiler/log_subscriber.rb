@@ -6,7 +6,7 @@ module ActiveRecordProfiler
       start_time = Time.now.to_f
       payload = event.payload
 
-      duration = event.duration
+      duration = event.duration / 1000.0  # convert from ms to seconds
       sql_string = payload[:sql]
 
       begin
