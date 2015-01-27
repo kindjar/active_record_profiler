@@ -2,7 +2,8 @@
 
 * Add self-profiling for the logger component
 * Prevent calling a logger.add block twice in the unusual case where the block returns a nil message.
-* Convert duration from milliseconds to seconds (doh!)
+* Convert duration in events from milliseconds to seconds (doh!). You'll want to clear old profiler data when upgrading.
+* Don't accumulate statistics for queries fulfilled by the CACHE 
 
 # 1.0
 

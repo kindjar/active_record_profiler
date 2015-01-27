@@ -2,9 +2,12 @@ require 'active_record/log_subscriber'
 
 module ActiveRecordProfiler
   class LogSubscriber < ActiveRecord::LogSubscriber
+    CACHE_PAYLOAD_NAME = 'CACHE'
+
     def sql(event)
       start_time = Time.now.to_f
       payload = event.payload
+      return if payload[:name] == CACHE_PAYLOAD_NAME
 
       duration = event.duration / 1000.0  # convert from ms to seconds
       sql_string = payload[:sql]
