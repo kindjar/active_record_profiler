@@ -3,7 +3,8 @@ var ActiveRecordProfiler = (function (my_module) {
 
   var SOURCE_ROOT_KEY = "db_prof_source_root";
   var SOURCE_EDITOR_KEY = "db_prof_source_editor";
-  var profilerSourceRootField, sourceEditorSelect, railsRoot;
+  var profilerSourceRootField, sourceEditorSelect, railsRoot, editorOptions, 
+      linkFormatters = {};
 
   function supportsLocalStorage() {
     try {
@@ -53,30 +54,58 @@ var ActiveRecordProfiler = (function (my_module) {
     }
   }
 
-  my_module.formatLink = function (file, line, editor) {
-    var link;
+  my_module.clearLinkFormatters = function () {
+    $.each(linkFormatters, function (editorName, formatter) {
+      if (editorOptions[editorName]) {
+        editorOptions[editorName].remove();
+      }
+    });
+    editorOptions = null;
+    linkFormatters = {};
+  };
 
-    switch (editor) {
-      case "subl":
-      case "txmt":
-        link = editor + "://open/?url=file://" + file + "&line=" + line;
-        break;
-      default:
-        // do nothing, return undefined link
+  my_module.registerLinkFormatter = function (name, formatter) {
+    if (!editorOptions) {
+      editorOptions = {};
+      sourceEditorSelect.find('option').each(function (index, el) {
+        jqElement = $(el);
+        editorOptions[jqElement.text()] = jqElement;
+      });
     }
 
-    return link;
+    linkFormatters[name] = formatter;
+    if (!editorOptions[name]) {
+      var newOption = $('<option>').text(name);
+      editorOptions[name] = newOption;
+      sourceEditorSelect.append(newOption);
+      if (name === getSourceEditor()) {
+        sourceEditorSelect.val(name);
+      }
+    } // else we already have an option and are just replacing the formatter
   };
 
   my_module.showSourceFile = function (file, line) {
     var root = profilerSourceRootField.val();
     var editor = sourceEditorSelect.val();
     if (root == "") { root = railsRoot; }
-    // window.location = "txmt://open/?url=file://" + root + "/" + file + "&line=" + line;
-    var link = my_module.formatLink(root + "/" + file, line, editor);
-    if (link) {
-      window.location = link;
+
+    if (!editor) {
+      console.log("Cannot link to source code: no editor specified.");
+      return;
     }
+    var linkFormatter = linkFormatters[editor];
+    if (!linkFormatter) {
+      console.log("Cannot link to source code: no link formatter for editor '" + editor + "'.");
+      return;
+    }
+    var link = linkFormatter(root + "/" + file, line, editor);
+    if (!link) {
+      console.log("Cannot link to source code: link formatter returned undefined.");
+      return;
+    }
+
+    // Send browser to editor link
+    window.location = link;
   };
 
   $(function () {
@@ -97,6 +126,20 @@ var ActiveRecordProfiler = (function (my_module) {
     $('.profiler-report').on('click', '.source-link', function (event) {
       var link = $(this);
       my_module.showSourceFile(link.data('file'), link.data('line'));
+    });
+
+    // Install console.log dummy function if it doesn't exist, so we can log
+    // without fuss.
+    if (typeof window.console == 'undefined') { 
+      window.console = {log: function (msg) {} }; 
+    }
+
+    // Add known editors/link formatters
+    ActiveRecordProfiler.registerLinkFormatter('Sublime Text', function(file, line) {
+      return "subl://open/?url=file://" + file + "&line=" + line;
+    });
+    ActiveRecordProfiler.registerLinkFormatter('TextMate', function(file, line) {
+      return "txmt://open/?url=file://" + file + "&line=" + line;
     });
   });
 

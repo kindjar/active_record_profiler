@@ -1,3 +1,7 @@
+# 1.2.0
+
+* Support for registering alternate editor URL schemes (see README)
+
 # 1.1.0
 
 * Add self-profiling for the logger component
