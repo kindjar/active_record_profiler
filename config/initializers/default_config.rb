@@ -4,5 +4,6 @@ ActiveRecordProfiler.sql_ignore_pattern =
   /^(SHOW (:?FULL )?FIELDS |SET SQL_AUTO_IS_NULL|SET NAMES |EXPLAIN |BEGIN|COMMIT|PRAGMA )/i
 ActiveRecordProfiler.app_path_pattern = Regexp.new(Regexp.quote("#{Rails.root.expand_path}/") + "(:?app|lib|vendor)/")
 ActiveRecordProfiler.trim_root_path = "#{Rails.root.expand_path}/"
+ActiveRecordProfiler.trim_cache_id_pattern = /___?[0-9]+_[0-9]+(?=')/
 ActiveRecordProfiler.profile_self = false
 ActiveRecordProfiler.link_location = false

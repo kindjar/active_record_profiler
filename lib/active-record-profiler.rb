@@ -7,8 +7,9 @@ require "active-record-profiler/engine" if defined?(Rails)
 module ActiveRecordProfiler
   require 'fileutils'
   require 'json'
-  
-  mattr_accessor :link_location, :stats_flush_period, :profile_dir, 
-      :sql_ignore_pattern, :app_path_pattern, :trim_root_path, :profile_self
+
+  mattr_accessor :link_location, :stats_flush_period, :profile_dir,
+      :sql_ignore_pattern, :app_path_pattern, :trim_root_path,
+      :trim_cache_id_pattern, :profile_self
 end
 
