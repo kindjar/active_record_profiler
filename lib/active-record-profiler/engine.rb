@@ -8,10 +8,12 @@ module ActiveRecordProfiler
 
     initializer "active_record_profiler.apply_default" do
       # Copy module settings to collector class
-      [:stats_flush_period, :profile_dir, :sql_ignore_pattern, 
-          :app_path_pattern, :trim_root_path, :profile_self
+      [
+        :stats_flush_period, :profile_dir, :sql_ignore_pattern,
+        :app_path_pattern, :trim_root_path, :trim_cache_id_pattern,
+        :profile_self
       ].each do |config_item|
-        ActiveRecordProfiler::Collector.send("#{config_item}=".to_sym, 
+        ActiveRecordProfiler::Collector.send("#{config_item}=".to_sym,
             ActiveRecordProfiler.send(config_item))
       end
     end

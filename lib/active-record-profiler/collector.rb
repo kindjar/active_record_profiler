@@ -42,7 +42,11 @@ module ActiveRecordProfiler
     
     # This prefix will be removed from location names, for brevity.
     cattr_accessor :trim_root_path
-    
+
+    # This pattern will be removed from location names, to remove cache ids that change
+    # when templates are recompiled.
+    cattr_accessor :trim_cache_id_pattern
+
     # Controls whether or not to record profiling data for time spent in the
     # profiler code itself.
     cattr_accessor :profile_self
@@ -188,8 +192,8 @@ module ActiveRecordProfiler
     protected
 
     def find_app_call_location(call_stack)
-      call_stack = caller
-      while frame = call_stack.shift
+      call_stack ||= caller(2)
+      call_stack.each do |frame|
         if app_path_pattern.match(frame)
           return trim_location(frame)
         end
@@ -198,7 +202,7 @@ module ActiveRecordProfiler
     end
     
     def trim_location(loc)
-      loc.sub(trim_root_path, '')
+      loc.sub(trim_root_path, '').sub(trim_cache_id_pattern, '')
     end
     
     def update_counts(location, seconds, count, sql, longest = nil)
