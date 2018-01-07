@@ -23,5 +23,9 @@ module ActiveRecordProfiler
     def location_description(path, line_number)
       "#{breakable_path(path)}: #{h(line_number)}".html_safe
     end
+
+    def report_params
+      @_report_params ||= params.permit(:sort, :date)
+    end
   end
 end

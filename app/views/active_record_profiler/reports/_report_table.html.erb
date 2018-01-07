@@ -3,16 +3,16 @@
     <tr>
       <th class="location">Location</th>
       <th class="duration">
-        <%= report_column_header_link(ActiveRecordProfiler::Collector::DURATION, @report_options[:sort], 'Total Duration (s)', params) %>
+        <%= report_column_header_link(ActiveRecordProfiler::Collector::DURATION, @report_options[:sort], 'Total Duration (s)', report_params) %>
       </th>
       <th class="count">
-        <%= report_column_header_link(ActiveRecordProfiler::Collector::COUNT, @report_options[:sort], 'Count', params) %>
+        <%= report_column_header_link(ActiveRecordProfiler::Collector::COUNT, @report_options[:sort], 'Count', report_params) %>
       </th>
       <th class="average-duration">
-        <%= report_column_header_link(ActiveRecordProfiler::Collector::AVG_DURATION, @report_options[:sort], 'Avg. Duration (ms)', params) %>
+        <%= report_column_header_link(ActiveRecordProfiler::Collector::AVG_DURATION, @report_options[:sort], 'Avg. Duration (ms)', report_params) %>
       </th>
       <th class="max-duration">
-        <%= report_column_header_link(ActiveRecordProfiler::Collector::LONGEST, @report_options[:sort], 'Max. Duration (ms)', params) %>          
+        <%= report_column_header_link(ActiveRecordProfiler::Collector::LONGEST, @report_options[:sort], 'Max. Duration (ms)', report_params) %>          
       </th>
       <th class="max-duration-sql">SQL for Max Duration</th>
     </tr>
