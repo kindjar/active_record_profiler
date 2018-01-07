@@ -24,6 +24,12 @@ Add it to your Gemfile, like so:
 gem 'active-record-profiler'
 ```
 
+If you are using a version of Rails older than 5, you'll want the 1.2 release:
+
+```ruby
+gem 'active-record-profiler', '~> 1.2.1'
+```
+
 Then do `bundle install`, and then add a new initializer, `config/initializers/active_record_profiler.rb`:
 
 ```ruby
