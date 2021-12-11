@@ -27,5 +27,5 @@ EOF
   spec.add_development_dependency "bundler", ">= 2.2.33"
   spec.add_development_dependency "rake", ">= 12.3.3"
   spec.add_development_dependency "minitest", "~> 5.1"
-  spec.add_development_dependency "sqlite3", "~> 1.3"
+  spec.add_development_dependency "sqlite3", "~> 1.3.6"
 end
