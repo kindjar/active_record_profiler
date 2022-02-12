@@ -21,11 +21,11 @@ EOF
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "rails", ">= 5.0"
+  spec.add_dependency "rails", ">= 5.0", "< 6.0"
   spec.add_dependency "jquery-rails"
 
   spec.add_development_dependency "bundler", ">= 2.2.33"
   spec.add_development_dependency "rake", ">= 12.3.3"
   spec.add_development_dependency "minitest", "~> 5.1"
-  spec.add_development_dependency "sqlite3", "~> 1.3.6"
+  spec.add_development_dependency "sqlite3", ">= 1.3.6"
 end
